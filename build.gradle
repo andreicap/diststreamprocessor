@@ -1,0 +1,50 @@
+buildscript {
+    ext {
+        springBootVersion = '1.5.9.RELEASE'
+    }
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+    }
+}
+
+group = 'it.polimi'
+
+apply plugin: 'idea'
+apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
+
+version = 'latest'
+sourceCompatibility = 1.9
+
+repositories {
+    mavenCentral()
+}
+
+sourceSets {
+    main {
+        java.srcDir 'src/main/java'
+    }
+    test {
+        groovy.srcDir 'src/test/groovy'
+    }
+}
+
+dependencies {
+    compile('org.springframework.boot:spring-boot-starter')
+    compile('org.springframework.boot:spring-boot-starter-web')
+    compile('org.springframework.boot:spring-boot-starter-websocket')
+    compile("org.webjars:webjars-locator-core:0.35")
+    compile("org.webjars:sockjs-client:1.0.2")
+    compile("org.webjars:stomp-websocket:2.3.3")
+    compile("org.webjars:bootstrap:3.3.7")
+    compile("org.webjars:jquery:3.1.0")
+    compile('com.google.guava:guava:16.0.1')
+    compile('joda-time:joda-time')
+    compileOnly('org.projectlombok:lombok:1.16.20')
+    testCompile('junit:junit:4.12')
+    testCompile('org.codehaus.groovy:groovy-all:2.4.4')
+    testCompile('org.spockframework:spock-core:1.0-groovy-2.4')
+}

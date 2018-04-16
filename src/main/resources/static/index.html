@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hello WebSocket</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/style.css" rel="stylesheet">
+    <script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
+</head>
+<body>
+<noscript><h2 style="color: #ff0000">Seems your browser doesn't support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!</h2></noscript>
+
+<nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="">Distributed Stream Processing</a>
+        </div>
+    </div>
+</nav>
+
+<div id="main-content" class="container">
+    <div class="row">
+        <div class="col-md-8">
+            <table id="machines-table" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Available machines</th>
+                </tr>
+                </thead>
+                <tbody id="machines">
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+</html>
