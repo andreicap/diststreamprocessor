@@ -24,14 +24,49 @@
 
 <div id="main-content" class="container">
     <div class="row">
-        <div class="col-md-8">
-            <table id="machines-table" class="table table-striped">
+        <div class="col-md-9">
+            <h4>Available workers</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <table id="workers-table" class="table table-striped">
                 <thead>
                 <tr>
-                    <th>Available machines</th>
+                    <th>Id</th>
+                    <th>Address</th>
                 </tr>
                 </thead>
-                <tbody id="machines">
+                <tbody id="workers">
+                </tbody>
+            </table>
+        </div>
+        <div class="col-md-3">
+            <form>
+                <label class="btn btn-default btn-file">
+                    <input id="graphDefinition" type="file" accept=".json">
+                </label>
+                <p id="errorMessage" class="red"></p>
+                <button type="button" class="btn btn-success right margin-top-10" onclick="deploy();">Deploy</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <h4>Logs</h4>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-9">
+            <table id="logs-table" class="table table-striped">
+                <thead>
+                <tr>
+                    <th width="32%">Timestamp</th>
+                    <th width="8%">Level</th>
+                    <th width="60%">Message</th>
+                </tr>
+                </thead>
+                <tbody id="logs">
                 </tbody>
             </table>
         </div>

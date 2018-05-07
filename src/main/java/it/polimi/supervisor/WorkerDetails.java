@@ -1,4 +1,4 @@
-package it.polimi.panel.dto;
+package it.polimi.supervisor;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +9,11 @@ import lombok.experimental.Wither;
 @Wither
 @NoArgsConstructor
 @AllArgsConstructor
-public class MachineDetailsDTO {
+class WorkerDetails {
 
-    private Long machineId;
+    private Long workerId;
 
     private String host;
 
-    private String port;
+    private Integer port;
 }

@@ -2,11 +2,13 @@ package it.polimi;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-public class MasterNode {
+@ComponentScan("it.polimi.supervisor")
+public class SupervisorNode {
 
     public static void main(String[] args) {
-        SpringApplication.run(MasterNode.class, args);
+        SpringApplication.run(SupervisorNode.class, args);
     }
 }

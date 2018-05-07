@@ -1,0 +1,22 @@
+{
+  "operators": [
+    {
+      "id": 1,
+      "windowSize": 5,
+      "windowSlide": 1,
+      "aggregation": "MIN"
+    },
+    {
+      "id": 2,
+      "windowSize": 5,
+      "windowSlide": 1,
+      "aggregation": "MAX"
+    }
+  ],
+  "pipes": [
+    {
+      "input": 1,
+      "output": 2
+    }
+  ]
+}
