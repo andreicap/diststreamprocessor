@@ -5,8 +5,8 @@ function connect() {
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
         console.log('Connected: ' + frame);
-        stompClient.subscribe('/topic/workers', function (workersDetails) {
-            showWorkersDetails(JSON.parse(workersDetails.body));
+        stompClient.subscribe('/topic/operators', function (operatorsDetails) {
+            showOperatorsDetails(JSON.parse(operatorsDetails.body));
         });
         stompClient.subscribe('/topic/logs', function (log) {
             showLogs(JSON.parse(log.body));
@@ -21,11 +21,11 @@ function disconnect() {
     console.log("Disconnected");
 }
 
-function showWorkersDetails(workersDetails) {
-    $("#workers").html("");
-    for (var i = 0; i < workersDetails.length; i++) {
-        var worker = workersDetails[i];
-        $("#workers").append("<tr><td>" + worker.workerId + "</td><td>" + worker.host + ":" + worker.port + "</td></tr>");
+function showOperatorsDetails(operatorsDetails) {
+    $("#operators").html("");
+    for (var i = 0; i < operatorsDetails.length; i++) {
+        var operator = operatorsDetails[i];
+        $("#operators").append("<tr><td>" + operator.operatorId + "</td><td>" + operator.host + ":" + operator.port + "</td><td>" + operator.state + "</td></tr>");
     }
 }
 

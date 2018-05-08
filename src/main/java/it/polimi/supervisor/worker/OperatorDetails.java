@@ -1,4 +1,4 @@
-package it.polimi.supervisor;
+package it.polimi.supervisor.worker;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,11 +9,13 @@ import lombok.experimental.Wither;
 @Wither
 @NoArgsConstructor
 @AllArgsConstructor
-class WorkerDetails {
+public class OperatorDetails {
 
-    private Long workerId;
+    private Long operatorId;
 
     private String host;
 
     private Integer port;
+
+    private State state;
 }

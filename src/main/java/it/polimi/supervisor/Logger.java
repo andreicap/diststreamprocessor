@@ -10,26 +10,26 @@ import org.springframework.stereotype.Component;
 
 @Log
 @Component
-class Logger {
+public class Logger {
 
     private final SimpMessagingTemplate template;
 
     @Autowired
-    Logger(final SimpMessagingTemplate template) {
+    public Logger(final SimpMessagingTemplate template) {
         this.template = template;
     }
 
-    void info(final String message) {
+    public void info(final String message) {
         log.info(message);
         log("INFO", message);
     }
 
-    void warn(final String message) {
+    public void warn(final String message) {
         log.warning(message);
         log("WARN", message);
     }
 
-    void severe(final String message) {
+    public void severe(final String message) {
         log.severe(message);
         log("SEVERE", message);
     }
