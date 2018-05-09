@@ -9,3 +9,7 @@
 
 # Mac OS files
 .DS_Store
+
+diststreamprocessor.iml
+gradlew
+gradlew.bat
