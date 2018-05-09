@@ -46,11 +46,13 @@ public class Supervisor {
 
     @MessageMapping("/deploy")
     public void deploy(final GraphDefinition graphDefinition) {
-        logger.info("Deploying graph:" + graphDefinition);
         final List<Operator> operators = operatorRegistry.getOperators();
         if (operators.size() < graphDefinition.getOperators().size()) {
             logger.warn("Not enough operators");
             return;
         }
+
+        logger.info("Deploying graph:" + graphDefinition);
+        // TODO initiate operators
     }
 }

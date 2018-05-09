@@ -26,7 +26,7 @@ function showOperatorsDetails(operatorsDetails) {
     for (var i = 0; i < operatorsDetails.length; i++) {
         var operator = operatorsDetails[i];
         $("#operators").append(
-            "<tr class=\" " + getContext(operator.state()) + "\">" +
+            "<tr class=\" " + getContext(operator.state) + "\">" +
             "<td>" + operator.operatorId + "</td>" +
             "<td>" + operator.host + ":" + operator.port + "</td>" +
             "<td>" + operator.state + "</td>" +
