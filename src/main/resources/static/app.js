@@ -25,12 +25,34 @@ function showOperatorsDetails(operatorsDetails) {
     $("#operators").html("");
     for (var i = 0; i < operatorsDetails.length; i++) {
         var operator = operatorsDetails[i];
-        $("#operators").append("<tr><td>" + operator.operatorId + "</td><td>" + operator.host + ":" + operator.port + "</td><td>" + operator.state + "</td></tr>");
+        $("#operators").append(
+            "<tr class=\" " + getContext(operator.state()) + "\">" +
+            "<td>" + operator.operatorId + "</td>" +
+            "<td>" + operator.host + ":" + operator.port + "</td>" +
+            "<td>" + operator.state + "</td>" +
+            "</tr>");
+    }
+}
+
+function getContext(state) {
+    if (state === "FREE") {
+        return "success";
+    } else if (state === "BUSY") {
+        return "info";
+    } else if (state === "CRUSHED") {
+        return "danger";
+    } else {
+        return "default";
     }
 }
 
 function showLogs(log) {
-    $("#logs").append("<tr><td>" + log.time + "</td><td>" + log.level + "</td><td>" + log.message + "</td></tr>");
+    $("#logs").append(
+        "<tr>" +
+        "<td>" + log.time + "</td>" +
+        "<td>" + log.level + "</td>" +
+        "<td>" + log.message + "</td>" +
+        "</tr>");
 }
 
 function deploy() {
@@ -46,10 +68,8 @@ function deploy() {
     errorMessage.html("");
     console.log("Deploying graph");
     var reader = new FileReader();
-    reader.onload = (function(reader)
-    {
-        return function()
-        {
+    reader.onload = (function (reader) {
+        return function () {
             console.log(reader.result);
             stompClient.send("/app/deploy", {}, JSON.stringify(reader.result));
         }

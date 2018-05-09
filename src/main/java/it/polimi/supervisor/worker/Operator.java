@@ -26,7 +26,7 @@ public class Operator {
         this.operatorId = operatorId;
         this.socket = socket;
         this.logger = logger;
-        this.state = State.HEALTHY;
+        this.state = State.FREE;
 
         new Thread(this::periodicallySendHealthCheck).start();
         new Thread(this::handleResponse).start();

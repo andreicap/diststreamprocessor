@@ -36,12 +36,13 @@ public class OperatorNode {
     private static void serveCommands() {
         try {
             while (true) {
-                Object command = input.readObject();
-                if (command instanceof Command) {
+                Object object = input.readObject();
+                if (object instanceof Command) {
+                    final Command command = (Command) object;
                     log.info("Executing command: " + command);
-                    asyncExecuteCommand((Command) command);
+                    asyncExecuteCommand(command);
                 } else {
-                    log.warning("Unknown message: " + command);
+                    log.warning("Unknown message: " + object);
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
