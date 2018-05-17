@@ -47,6 +47,7 @@ public class Supervisor {
     @MessageMapping("/deploy")
     public void deploy(final GraphDefinition graphDefinition) {
         final List<Operator> operators = operatorRegistry.getOperators();
+        graphDefinition.validateGraph();
         if (operators.size() < graphDefinition.getOperators().size()) {
             logger.warn("Not enough operators");
             return;
