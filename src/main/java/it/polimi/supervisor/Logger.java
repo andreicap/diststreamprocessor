@@ -8,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 @Log
 @Component
 public class Logger {
@@ -40,7 +43,9 @@ public class Logger {
 
     @Value
     private class Log {
-        private final String time = DateTime.now().toString();
+        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
+        Date now = new Date();
+        String time = sdfDate.format(now);
 
         private final String level;
 
