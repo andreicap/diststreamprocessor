@@ -1,19 +1,19 @@
 {
   "operators": [
     {
-      "id": 1,
+      "id": 0,
       "windowSize": 5,
       "windowSlide": 1,
       "aggregation": "MIN"
     },
     {
-      "id": 2,
+      "id": 1,
       "windowSize": 5,
       "windowSlide": 1,
       "aggregation": "MAX"
     },
     {
-      "id": 3,
+      "id": 2,
       "windowSize": 5,
       "windowSlide": 1,
       "aggregation": "MAX"
@@ -21,16 +21,16 @@
   ],
   "pipes": [
     {
+      "input": 0,
+      "output": 2
+    },
+    {
       "input": 1,
       "output": 2
     },
     {
       "input": 2,
-      "output": 3
-    },
-    {
-      "input": 3,
-      "output": 1
+      "output": 0
     }
   ]
 }

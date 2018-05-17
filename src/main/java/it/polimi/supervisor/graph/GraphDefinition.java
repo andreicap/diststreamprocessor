@@ -77,10 +77,10 @@ public class GraphDefinition {
 
     private List<Integer> getChildren(Integer id) {
 
-        List<Integer> children = new ArrayList<Integer>(operators.size());
+        List<Integer> children = new ArrayList<Integer>();
         int i = 0;
         for (PipeDefinition p : pipes) {
-            if (p.getInput() == i) {
+            if (p.getInput() == id) {
                 children.add(p.getOutput());
             }
             i++;
