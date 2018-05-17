@@ -28,6 +28,8 @@ public class GraphDefinition {
         Boolean isCyclic = isCyclic();
         log.info("Is cyclic? - " + isCyclic);
 
+        if (isCyclic) return false;
+        // if (hasAliens) return false;
 
         return true;
     }
@@ -64,8 +66,9 @@ public class GraphDefinition {
         List<Integer> children = getChildren(i);
 
         for (Integer c : children)
-            if (isCyclicUtil(c, visited, stack))
+            if (isCyclicUtil(c, visited, stack)) {
                 return true;
+            }
 
         stack[i] = false;
 
@@ -78,7 +81,7 @@ public class GraphDefinition {
         int i = 0;
         for (PipeDefinition p : pipes) {
             if (p.getInput() == i) {
-                children.add(p.getOutput().intValue());
+                children.add(p.getOutput());
             }
             i++;
         }

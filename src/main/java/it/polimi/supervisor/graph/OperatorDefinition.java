@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class OperatorDefinition {
-    private Long id;
+    private Integer id;
 
     private Long windowSize;
 

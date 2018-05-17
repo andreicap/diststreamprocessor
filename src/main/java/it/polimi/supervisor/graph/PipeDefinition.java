@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class PipeDefinition {
-    private Long input;
+    private Integer input;
 
-    private Long output;
+    private Integer output;
 }

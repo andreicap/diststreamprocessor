@@ -47,7 +47,14 @@ public class Supervisor {
     @MessageMapping("/deploy")
     public void deploy(final GraphDefinition graphDefinition) {
         final List<Operator> operators = operatorRegistry.getOperators();
-        graphDefinition.validateGraph();
+
+        Boolean graphIsValid = graphDefinition.validateGraph();
+        if (!graphIsValid) {
+            logger.warn("Uploaded graph is not valid");
+        } else {
+            logger.info("Uploaded graph is valid");
+        }
+
         if (operators.size() < graphDefinition.getOperators().size()) {
             logger.warn("Not enough operators");
             return;
