@@ -57,6 +57,10 @@ public class OperatorNode {
     }
 
     private static void sendResult(final Object result) {
+        if (result == null) {
+            return;
+        }
+
         try {
             log.info("Sending result: " + result);
             output.writeObject(result);

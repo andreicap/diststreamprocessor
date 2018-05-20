@@ -2,8 +2,6 @@ package it.polimi.supervisor;
 
 import lombok.Value;
 import lombok.extern.java.Log;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Component;
@@ -14,6 +12,8 @@ import java.util.Date;
 @Log
 @Component
 public class Logger {
+
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
     private final SimpMessagingTemplate template;
 
@@ -43,9 +43,7 @@ public class Logger {
 
     @Value
     private class Log {
-        SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//dd/MM/yyyy
-        Date now = new Date();
-        String time = sdfDate.format(now);
+        private final String time = DATE_FORMAT.format(new Date());
 
         private final String level;
 

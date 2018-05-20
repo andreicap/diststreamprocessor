@@ -27,11 +27,19 @@ function showOperatorsDetails(operatorsDetails) {
         var operator = operatorsDetails[i];
         $("#operators").append(
             "<tr class=\" " + getContext(operator.state) + "\">" +
-            "<td>" + operator.operatorId + "</td>" +
+            "<td>" + operator.registrationId + "</td>" +
             "<td>" + operator.host + ":" + operator.port + "</td>" +
             "<td>" + operator.state + "</td>" +
+            "<td>" + prettyPrint(operator.operatorId) + "</td>" +
+            "<td>" + prettyPrint(operator.windowSlide) + "</td>" +
+            "<td>" + prettyPrint(operator.windowSize) + "</td>" +
+            "<td>" + prettyPrint(operator.aggregation) + "</td>" +
             "</tr>");
     }
+}
+
+function prettyPrint(value) {
+    return value == null ? "-" : value;
 }
 
 function getContext(state) {

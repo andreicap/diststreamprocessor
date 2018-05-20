@@ -1,5 +1,6 @@
 package it.polimi.supervisor.worker;
 
+import com.google.common.collect.Lists;
 import it.polimi.supervisor.Logger;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,6 @@ public class OperatorRegistry {
 
     private final Logger logger;
 
-    private final AtomicBoolean running;
-
     @Getter
     private final List<Operator> operators;
 
@@ -32,8 +31,7 @@ public class OperatorRegistry {
     @Autowired
     OperatorRegistry(final Logger logger) {
         this.logger = logger;
-        this.running = new AtomicBoolean(true);
-        this.operators = new LinkedList<>();
+        this.operators = Lists.newLinkedList();
         this.serverSocket = null;
     }
 
@@ -43,11 +41,10 @@ public class OperatorRegistry {
             try {
                 serverSocket = new ServerSocket(port);
                 logger.info("Listening for operators on: " + serverSocket.getInetAddress());
-                while (running.get()) {
+                while (true) {
                     final Socket clientSocket = serverSocket.accept();
-                    final long workerId = operators.size() + 1;
-                    operators.add(new Operator(workerId, clientSocket, logger));
-                    logger.info("New operator registered " + clientSocket.toString());
+                    final long registrationId = operators.size() + 1;
+                    registerOperator(registrationId, clientSocket);
                 }
             } catch (IOException e) {
                 logger.severe("OperatorRegistry failed.");
@@ -56,12 +53,12 @@ public class OperatorRegistry {
         }).start();
     }
 
-    void kill() {
-        running.set(false);
+    private void registerOperator(final long registrationId, final Socket clientSocket) {
         try {
-            serverSocket.close();
+            operators.add(new Operator(registrationId, clientSocket, logger));
+            logger.info("New operator registered " + clientSocket.toString());
         } catch (IOException e) {
-            logger.severe("OperatorRegistry failed to close.");
+            logger.warn("Failed to register new operator " + clientSocket.toString());
             e.printStackTrace();
         }
     }

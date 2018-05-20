@@ -1,6 +1,11 @@
 package it.polimi.supervisor;
 
+import com.google.common.collect.Streams;
 import it.polimi.supervisor.graph.GraphDefinition;
+import it.polimi.supervisor.graph.OperatorDefinition;
+import it.polimi.supervisor.graph.exception.CycleDetectedException;
+import it.polimi.supervisor.graph.exception.DuplicatedOperatorException;
+import it.polimi.supervisor.worker.Address;
 import it.polimi.supervisor.worker.Operator;
 import it.polimi.supervisor.worker.OperatorDetails;
 import it.polimi.supervisor.worker.OperatorRegistry;
@@ -40,27 +45,79 @@ public class Supervisor {
         final List<Operator> operators = operatorRegistry.getOperators();
         return operators.stream()
                 .map(Operator::getOperatorDetails)
-                .sorted(Comparator.comparingLong(OperatorDetails::getOperatorId))
+                .sorted(Comparator.comparingLong(OperatorDetails::getRegistrationId))
                 .collect(Collectors.toList());
     }
 
     @MessageMapping("/deploy")
     public void deploy(final GraphDefinition graphDefinition) {
-        final List<Operator> operators = operatorRegistry.getOperators();
-
-        Boolean graphIsValid = graphDefinition.validateGraph();
-        if (!graphIsValid) {
-            logger.warn("Uploaded graph is not valid");
-        } else {
-            logger.info("Uploaded graph is valid");
+        try {
+            graphDefinition.validate();
+        } catch (DuplicatedOperatorException exc) {
+            logger.warn("Uploaded graph is not valid - duplicated operators ids");
+            return;
+        } catch (CycleDetectedException exc) {
+            logger.warn("Uploaded graph is not valid - cycle detected");
+            return;
         }
 
-        if (operators.size() < graphDefinition.getOperators().size()) {
+        final List<Operator> operators = operatorRegistry.getOperators();
+        final int availableOperators = operators.size();
+        final int neededOperators = graphDefinition.getOperators().size();
+        if (availableOperators < neededOperators) {
             logger.warn("Not enough operators");
             return;
         }
 
         logger.info("Deploying graph:" + graphDefinition);
-        // TODO initiate operators
+        final List<Operator> selectedOperators = selectOperators(operators, neededOperators);
+        initiateOperators(selectedOperators, graphDefinition.getOperators());
+        initiatePipes(selectedOperators, graphDefinition);
+        selectedOperators.forEach(Operator::startStreamProcessing);
+        logger.info("Successfully deployed");
+    }
+
+    private List<Operator> selectOperators(final List<Operator> operators, final int size) {
+        return operators.stream()
+                .limit(size)
+                .collect(Collectors.toList());
+    }
+
+    private void initiateOperators(final List<Operator> selectedOperators, final List<OperatorDefinition> operatorDefinitions) {
+        Streams.forEachPair(selectedOperators.stream(), operatorDefinitions.stream(), (operator, definition) -> {
+            operator.setOperatorId(definition.getId());
+            operator.setWindowSize(definition.getWindowSize());
+            operator.setWindowSlide(definition.getWindowSlide());
+            operator.setAggregation(definition.getAggregation());
+        });
+    }
+
+    private void initiatePipes(final List<Operator> selectedOperators, final GraphDefinition graphDefinition) {
+        selectedOperators.forEach(operator -> {
+            final Integer operatorId = operator.getOperatorDetails().getOperatorId();
+
+            final List<Integer> inputOperatorsIds = graphDefinition.getInputOperatorsIds(operatorId);
+            final List<Address> inputs = mapToOperatorAddress(inputOperatorsIds, selectedOperators);
+            operator.setInputs(inputs);
+
+            final List<Integer> outputOperatorIds = graphDefinition.getOutputOperatorsIds(operatorId);
+            final List<Address> outputs = mapToOperatorAddress(outputOperatorIds, selectedOperators);
+            operator.setOutputs(outputs);
+        });
+
+    }
+
+    private List<Address> mapToOperatorAddress(final List<Integer> operatorIds, final List<Operator> selectedOperators) {
+        return operatorIds.stream()
+                .map(operatorId -> getOperatorAddress(operatorId, selectedOperators))
+                .collect(Collectors.toList());
+    }
+
+    private Address getOperatorAddress(final Integer operatorId, final List<Operator> operators) {
+        return operators.stream()
+                .filter(operator -> operator.getOperatorDetails().getOperatorId().equals(operatorId))
+                .findFirst()
+                .map(Operator::getAddress)
+                .get();
     }
 }
