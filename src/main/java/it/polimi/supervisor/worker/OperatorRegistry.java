@@ -11,9 +11,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 public class OperatorRegistry {
@@ -37,24 +35,27 @@ public class OperatorRegistry {
 
     @PostConstruct
     void init() {
-        new Thread(() -> {
-            try {
-                serverSocket = new ServerSocket(port);
-                logger.info("Listening for operators on: " + serverSocket.getInetAddress());
-                while (true) {
-                    final Socket clientSocket = serverSocket.accept();
-                    final long registrationId = operators.size() + 1;
-                    registerOperator(registrationId, clientSocket);
-                }
-            } catch (IOException e) {
-                logger.severe("OperatorRegistry failed.");
-                e.printStackTrace();
+        new Thread(this::listenForOperators).start();
+    }
+
+    private void listenForOperators() {
+        try {
+            serverSocket = new ServerSocket(port);
+            logger.info("Listening for operators on: " + serverSocket.getInetAddress());
+            while (true) {
+                final Socket clientSocket = serverSocket.accept();
+                final long registrationId = operators.size() + 1;
+                registerOperator(registrationId, clientSocket);
             }
-        }).start();
+        } catch (IOException e) {
+            logger.severe("OperatorRegistry failed.");
+            e.printStackTrace();
+        }
     }
 
     private void registerOperator(final long registrationId, final Socket clientSocket) {
         try {
+            logger.info("Registering " + clientSocket.toString());
             operators.add(new Operator(registrationId, clientSocket, logger));
             logger.info("New operator registered " + clientSocket.toString());
         } catch (IOException e) {

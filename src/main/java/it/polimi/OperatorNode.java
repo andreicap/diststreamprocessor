@@ -1,42 +1,75 @@
 package it.polimi;
 
+import com.google.common.collect.Lists;
 import it.polimi.command.Command;
+import it.polimi.supervisor.worker.Address;
+import it.polimi.supervisor.worker.State;
+import it.polimi.util.WindowedInputStream;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.concurrent.CompletableFuture;
+import java.util.List;
 
 @Log
 public class OperatorNode {
 
-    private static ObjectInputStream input;
+    private static final int ANY_PORT = 0;
 
-    private static ObjectOutputStream output;
+    public static List<WindowedInputStream> inputStreams = Lists.newArrayList();
+
+    public static List<ObjectOutputStream> outputStreams;
+
+    public static State state = State.FREE;
+
+    private static ServerSocket serverSocket;
+
+    private static ObjectInputStream supervisorInputStream;
+
+    private static ObjectOutputStream supervisorOutputStream;
 
     public static void main(String[] args) {
+        new Thread(OperatorNode::acceptInputStreams).start();
         register();
+        new Thread(OperatorNode::serveSupervisorCommands).start();
     }
 
-    private static void register() {
-        log.info("Registering operator");
+    private static void acceptInputStreams() {
         try {
-            final Socket socket = new Socket("localhost", 2000);
-            input = new ObjectInputStream(socket.getInputStream());
-            output = new ObjectOutputStream(socket.getOutputStream());
-
-            new Thread(OperatorNode::serveCommands).start();
+            serverSocket = new ServerSocket(ANY_PORT);
+            log.info("Listening for input on: " + serverSocket);
+            while (true) {
+                final Socket clientSocket = serverSocket.accept();
+                log.info("Received connection from: " + clientSocket);
+                inputStreams.add(new WindowedInputStream(clientSocket));
+            }
         } catch (IOException e) {
+            log.severe("Operator failed.");
             e.printStackTrace();
         }
     }
 
-    private static void serveCommands() {
+    private static void register() {
+        try {
+            log.info("Registering operator.");
+            final Socket socket = new Socket("localhost", 2000);
+            supervisorOutputStream = new ObjectOutputStream(socket.getOutputStream());
+            final Address address = new Address(serverSocket.getInetAddress().getHostName(), serverSocket.getLocalPort());
+            supervisorOutputStream.writeObject(address);
+            supervisorInputStream = new ObjectInputStream(socket.getInputStream());
+        } catch (IOException e) {
+            log.severe("Failed to register.");
+            e.printStackTrace();
+        }
+    }
+
+    private static void serveSupervisorCommands() {
         try {
             while (true) {
-                Object object = input.readObject();
+                Object object = supervisorInputStream.readObject();
                 if (object instanceof Command) {
                     final Command command = (Command) object;
                     log.info("Executing command: " + command);
@@ -51,9 +84,7 @@ public class OperatorNode {
     }
 
     private static void asyncExecuteCommand(final Command command) {
-        CompletableFuture
-                .supplyAsync(command::execute)
-                .thenAccept(OperatorNode::sendResult);
+        new Thread(() -> sendResult(command.execute())).start();
     }
 
     private static void sendResult(final Object result) {
@@ -63,7 +94,7 @@ public class OperatorNode {
 
         try {
             log.info("Sending result: " + result);
-            output.writeObject(result);
+            supervisorOutputStream.writeObject(result);
         } catch (IOException e) {
             e.printStackTrace();
         }

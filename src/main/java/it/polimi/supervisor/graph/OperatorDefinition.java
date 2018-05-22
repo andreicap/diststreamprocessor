@@ -6,9 +6,9 @@ import lombok.Data;
 public class OperatorDefinition {
     private Integer id;
 
-    private Long windowSize;
+    private Integer windowSize;
 
-    private Long windowSlide;
+    private Integer windowSlide;
 
     private Aggregation aggregation;
 }

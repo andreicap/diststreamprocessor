@@ -42,6 +42,7 @@ dependencies {
     compile('org.webjars:bootstrap:3.3.7')
     compile('org.webjars:jquery:3.1.0')
     compile('com.google.guava:guava:23.0')
+    compile('org.awaitility:awaitility:3.0.0')
     compile('joda-time:joda-time')
     compileOnly('org.projectlombok:lombok:1.16.20')
     testCompile('junit:junit:4.12')

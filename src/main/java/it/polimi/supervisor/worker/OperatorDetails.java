@@ -22,9 +22,9 @@ public class OperatorDetails {
 
     private Integer operatorId;
 
-    private Long windowSize;
+    private Integer windowSize;
 
-    private Long windowSlide;
+    private Integer windowSlide;
 
     private Aggregation aggregation;
 }

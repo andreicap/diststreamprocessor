@@ -32,5 +32,7 @@
       "input": 2,
       "output": 0
     }
-  ]
+  ],
+  "inputValues": [1, 2, 3],
+  "delay": 100
 }

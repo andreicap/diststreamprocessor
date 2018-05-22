@@ -2,22 +2,18 @@
   "operators": [
     {
       "id": 0,
-      "windowSize": 2,
-      "windowSlide": 2,
+      "windowSize": 3,
+      "windowSlide": 1,
       "aggregation": "MIN"
     },
     {
       "id": 1,
       "windowSize": 2,
-      "windowSlide": 2,
-      "aggregation": "MAX"
+      "windowSlide": 3,
+      "aggregation": "SUM"
     }
   ],
   "pipes": [
-    {
-      "input": 0,
-      "output": 1
-    }
   ],
   "inputValues": [1, 2, 5, 6, 4, 0, 7, 1, 5, 8, 4, 6, 2, 6, -4, 3, -2, 0, 9],
   "delay": 100

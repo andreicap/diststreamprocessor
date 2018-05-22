@@ -19,6 +19,10 @@ public class GraphDefinition {
 
     private List<PipeDefinition> pipes;
 
+    private List<Double> inputValues;
+
+    private Integer delay;
+
     public static GraphDefinition fromString(final String json) throws IOException {
         return new ObjectMapper().readValue(json, GraphDefinition.class);
     }
@@ -44,6 +48,26 @@ public class GraphDefinition {
         return pipes.stream()
                 .filter(pipe -> pipe.getInput().equals(operatorId))
                 .map(PipeDefinition::getOutput)
+                .collect(Collectors.toList());
+    }
+
+    public List<Integer> getRootIds() {
+        return operators.stream()
+                .map(OperatorDefinition::getId)
+                .filter(operatorId -> !pipes.stream()
+                        .map(PipeDefinition::getOutput)
+                        .collect(Collectors.toList())
+                        .contains(operatorId))
+                .collect(Collectors.toList());
+    }
+
+    public List<Integer> getLeavesIds() {
+        return operators.stream()
+                .map(OperatorDefinition::getId)
+                .filter(operatorId -> !pipes.stream()
+                        .map(PipeDefinition::getInput)
+                        .collect(Collectors.toList())
+                        .contains(operatorId))
                 .collect(Collectors.toList());
     }
 

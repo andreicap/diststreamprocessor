@@ -1,10 +1,12 @@
 package it.polimi.supervisor.worker;
 
 import it.polimi.command.Command;
+import it.polimi.command.Deploy;
 import it.polimi.command.HealthCheck;
-import it.polimi.command.ProcessStream;
+import it.polimi.command.StartProcessing;
 import it.polimi.supervisor.Logger;
 import it.polimi.supervisor.graph.Aggregation;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
 
@@ -21,35 +23,46 @@ import java.util.concurrent.TimeUnit;
 @Log
 public class Operator {
 
+    @Getter
     private final Long registrationId;
 
     private final Socket socket;
 
-    private final ObjectOutputStream output;
-
     private final Logger logger;
+
+    private final ObjectOutputStream output;
 
     private final ScheduledFuture<?> future;
 
+    @Getter
     private State state = State.FREE;
 
     @Setter
+    @Getter
     private Integer operatorId;
 
     @Setter
-    private Long windowSize;
+    @Getter
+    private Integer windowSize;
 
     @Setter
-    private Long windowSlide;
+    @Getter
+    private Integer windowSlide;
 
     @Setter
+    @Getter
     private Aggregation aggregation;
 
     @Setter
-    private List<Address> inputs;
+    @Getter
+    private Integer inputsNumber;
 
     @Setter
-    private List<Address> outputs;
+    @Getter
+    private List<Address> outputsAdresses;
+
+    @Getter
+    private Address address;
 
     Operator(final Long registrationId, final Socket socket, final Logger logger) throws IOException {
         this.registrationId = registrationId;
@@ -57,18 +70,33 @@ public class Operator {
         this.logger = logger;
         this.output = new ObjectOutputStream(socket.getOutputStream());
 
-        final ScheduledExecutorService service = Executors.newScheduledThreadPool(2);
-        service.execute(this::handleResponse);
-        this.future = service.scheduleAtFixedRate(() -> executeRemoteCommand(new HealthCheck()), 0, 2, TimeUnit.SECONDS);
+        new Thread(this::handleResponses).start();
+
+        final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+        this.future = service.scheduleAtFixedRate(() -> executeRemoteCommand(new HealthCheck()), 0, 60, TimeUnit.SECONDS);
     }
 
-    private void handleResponse() {
+    public void deploy() {
+        executeRemoteCommand(new Deploy(outputsAdresses));
+    }
+
+    public void startProcessing() {
+        executeRemoteCommand(new StartProcessing(operatorId, windowSize, windowSlide, aggregation, inputsNumber));
+    }
+
+    private void handleResponses() {
         try {
             final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
             while (true) {
-                log.info("reading");
                 final Object response = input.readObject();
-                log.info(response.toString());
+                log.info("Message arrived: " + response.toString());
+                if (response instanceof Address) {
+                    address = (Address) response;
+                } else if (response instanceof State) {
+                    state = (State) response;
+                } else {
+                    log.warning("Unknown message " + response.toString());
+                }
             }
         } catch (IOException | ClassNotFoundException e) {
             state = State.CRUSHED;
@@ -76,15 +104,11 @@ public class Operator {
         }
     }
 
-    public void startStreamProcessing() {
-        executeRemoteCommand(new ProcessStream(operatorId, windowSize, windowSlide, aggregation, inputs, outputs));
-    }
-
     private void executeRemoteCommand(final Command command) {
         try {
-            log.info("executing command: " + command.toString());
+            log.info("Executing command: " + command.toString());
             output.writeObject(command);
-            log.info("executed");
+            log.info("Executed command: " + command.toString());
         } catch (IOException e) {
             state = State.CRUSHED;
             future.cancel(true);
@@ -96,16 +120,12 @@ public class Operator {
     public OperatorDetails getOperatorDetails() {
         return new OperatorDetails()
                 .withRegistrationId(registrationId)
-                .withHost(socket.getInetAddress().getHostName())
-                .withPort(socket.getPort())
+                .withHost(address != null ? address.getHost() : null)
+                .withPort(address != null ? address.getPort() : null)
                 .withState(state)
                 .withOperatorId(operatorId)
                 .withWindowSize(windowSize)
                 .withWindowSlide(windowSlide)
                 .withAggregation(aggregation);
-    }
-
-    public Address getAddress() {
-        return new Address(socket.getInetAddress().getHostName(), socket.getPort());
     }
 }

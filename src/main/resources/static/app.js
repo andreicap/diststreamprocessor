@@ -45,8 +45,10 @@ function prettyPrint(value) {
 function getContext(state) {
     if (state === "FREE") {
         return "success";
-    } else if (state === "BUSY") {
+    } else if (state === "READY") {
         return "info";
+    } else if (state === "BUSY") {
+        return "warning";
     } else if (state === "CRUSHED") {
         return "danger";
     } else {

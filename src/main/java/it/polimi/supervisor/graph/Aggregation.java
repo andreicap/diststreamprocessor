@@ -4,5 +4,5 @@ public enum Aggregation {
     AVERAGE,
     SUM,
     MIN,
-    MAX;
+    MAX
 }
