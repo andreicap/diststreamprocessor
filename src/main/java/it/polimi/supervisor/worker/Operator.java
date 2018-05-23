@@ -6,6 +6,7 @@ import it.polimi.command.HealthCheck;
 import it.polimi.command.StartProcessing;
 import it.polimi.supervisor.Logger;
 import it.polimi.supervisor.graph.Aggregation;
+import it.polimi.util.RxObjectInputStream;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
@@ -32,7 +33,7 @@ public class Operator {
 
     private final ObjectOutputStream output;
 
-    private final ScheduledFuture<?> future;
+    private ScheduledFuture<?> future;
 
     @Getter
     private State state = State.FREE;
@@ -70,10 +71,24 @@ public class Operator {
         this.logger = logger;
         this.output = new ObjectOutputStream(socket.getOutputStream());
 
-        new Thread(this::handleResponses).start();
+        handleResponses();
+        scheduledHealthCheck();
+    }
 
+    private void handleResponses() {
+        new RxObjectInputStream(socket)
+                .subscribe((input) -> address = input, Address.class)
+                .subscribe((input) -> state = input, State.class)
+                .onException((e) -> {
+                    state = State.CRUSHED;
+                    e.printStackTrace();
+                })
+                .start();
+    }
+
+    private void scheduledHealthCheck() {
         final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        this.future = service.scheduleAtFixedRate(() -> executeRemoteCommand(new HealthCheck()), 0, 60, TimeUnit.SECONDS);
+        this.future = service.scheduleAtFixedRate(() -> executeRemoteCommand(new HealthCheck()), 0, 2, TimeUnit.SECONDS);
     }
 
     public void deploy() {
@@ -82,26 +97,6 @@ public class Operator {
 
     public void startProcessing() {
         executeRemoteCommand(new StartProcessing(operatorId, windowSize, windowSlide, aggregation, inputsNumber));
-    }
-
-    private void handleResponses() {
-        try {
-            final ObjectInputStream input = new ObjectInputStream(socket.getInputStream());
-            while (true) {
-                final Object response = input.readObject();
-                log.info("Message arrived: " + response.toString());
-                if (response instanceof Address) {
-                    address = (Address) response;
-                } else if (response instanceof State) {
-                    state = (State) response;
-                } else {
-                    log.warning("Unknown message " + response.toString());
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            state = State.CRUSHED;
-            e.printStackTrace();
-        }
     }
 
     private void executeRemoteCommand(final Command command) {

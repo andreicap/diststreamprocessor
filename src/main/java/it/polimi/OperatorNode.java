@@ -2,8 +2,10 @@ package it.polimi;
 
 import com.google.common.collect.Lists;
 import it.polimi.command.Command;
+import it.polimi.command.HealthCheck;
 import it.polimi.supervisor.worker.Address;
 import it.polimi.supervisor.worker.State;
+import it.polimi.util.RxObjectInputStream;
 import it.polimi.util.WindowedInputStream;
 import lombok.extern.java.Log;
 
@@ -34,7 +36,6 @@ public class OperatorNode {
     public static void main(String[] args) {
         new Thread(OperatorNode::acceptInputStreams).start();
         register();
-        new Thread(OperatorNode::serveSupervisorCommands).start();
     }
 
     private static void acceptInputStreams() {
@@ -59,31 +60,22 @@ public class OperatorNode {
             supervisorOutputStream = new ObjectOutputStream(socket.getOutputStream());
             final Address address = new Address(serverSocket.getInetAddress().getHostName(), serverSocket.getLocalPort());
             supervisorOutputStream.writeObject(address);
-            supervisorInputStream = new ObjectInputStream(socket.getInputStream());
+
+            serveSupervisorCommands(socket);
         } catch (IOException e) {
             log.severe("Failed to register.");
             e.printStackTrace();
         }
     }
 
-    private static void serveSupervisorCommands() {
-        try {
-            while (true) {
-                Object object = supervisorInputStream.readObject();
-                if (object instanceof Command) {
-                    final Command command = (Command) object;
-                    log.info("Executing command: " + command);
-                    asyncExecuteCommand(command);
-                } else {
-                    log.warning("Unknown message: " + object);
-                }
-            }
-        } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+    private static void serveSupervisorCommands(final Socket socket) {
+        new RxObjectInputStream(socket)
+                .subscribe(OperatorNode::asyncExecuteCommand, Command.class)
+                .start();
     }
 
     private static void asyncExecuteCommand(final Command command) {
+        log.info("Executing command: " + command);
         new Thread(() -> sendResult(command.execute())).start();
     }
 

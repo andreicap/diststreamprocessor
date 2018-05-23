@@ -39,10 +39,10 @@ public class StartProcessing implements Command {
         return OperatorNode.state;
     }
 
-    private void forwardResult(double result) {
+    private void forwardResult(final Double result) {
         OperatorNode.outputStreams.forEach(outputStream -> {
             try {
-                outputStream.writeDouble(result);
+                outputStream.writeObject(result);
             } catch (IOException e) {
                 e.printStackTrace();
             }

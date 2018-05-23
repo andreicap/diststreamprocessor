@@ -34,9 +34,9 @@ public class WindowedInputStream {
             while (true) {
                 try {
                     synchronized (this) {
-                        buffer.add(input.readDouble());
+                        buffer.add((Double) input.readObject());
                     }
-                } catch (EOFException e) {
+                } catch (EOFException | ClassNotFoundException e) {
                     log.info("Stream from " + socket + " has ended.");
                     input.close();
                     socket.close();

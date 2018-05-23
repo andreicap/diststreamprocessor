@@ -7,6 +7,7 @@ import it.polimi.supervisor.graph.OperatorDefinition;
 import it.polimi.supervisor.graph.exception.CycleDetectedException;
 import it.polimi.supervisor.graph.exception.DuplicatedOperatorException;
 import it.polimi.supervisor.worker.*;
+import it.polimi.util.RxObjectInputStream;
 import org.awaitility.Duration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -23,6 +24,7 @@ import java.net.Socket;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
@@ -147,37 +149,22 @@ public class Supervisor {
 
     private void collectOutputAndLog(final ServerSocket targetServerSocket, final int leafOperators) {
         final List<Double> finalOutput = Collections.synchronizedList(Lists.newArrayList());
-        final List<Thread> threads = Lists.newArrayList();
-
+        final AtomicInteger counter = new AtomicInteger(0);
         try {
             for (int i = 0; i < leafOperators; i++) {
                 final Socket leafOperatorSocket = targetServerSocket.accept();
-                threads.add(new Thread(() -> readAndSaveResults(leafOperatorSocket, finalOutput)));
+                new RxObjectInputStream(leafOperatorSocket)
+                        .onException((e) -> counter.incrementAndGet()
+                        )
+                        .subscribe(value -> {
+                            finalOutput.add(value);
+                        }, Double.class)
+                        .start();
             }
 
-            threads.forEach(Thread::start);
-            threads.forEach(thread -> {
-                try {
-                    thread.join();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
+            await().until(() -> counter.get() == leafOperators);
+            logger.info("Output: " + finalOutput);
             targetServerSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        logger.info("Output: " + finalOutput);
-    }
-
-    private void readAndSaveResults(final Socket leafOperatorSocket, final List<Double> finalOutput) {
-        try {
-            final ObjectInputStream inputStream = new ObjectInputStream(leafOperatorSocket.getInputStream());
-            while (true) {
-                finalOutput.add(inputStream.readDouble());
-            }
-        } catch (EOFException e) {
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -185,7 +172,7 @@ public class Supervisor {
 
     private void waitUntilAllOperatorsAreReady(final List<Operator> selectedOperators) {
         await()
-                .atMost(Duration.FIVE_SECONDS)
+                .atMost(Duration.ONE_SECOND)
                 .until(() -> selectedOperators.stream()
                         .map(Operator::getState)
                         .allMatch(state -> state == State.READY));
@@ -212,7 +199,7 @@ public class Supervisor {
             inputValues.forEach(i -> {
                 try {
                     Thread.sleep(delay);
-                    output.writeDouble(i);
+                    output.writeObject(i);
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
