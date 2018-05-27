@@ -14,18 +14,18 @@ public class Deploy implements Command {
 
     private final List<Address> outputsAdresses;
 
-    public static void initiateOutputStreams(final List<Address> outputsAdresses) {
-        OperatorNode.outputStreams = outputsAdresses.stream()
-                .map(Address::getOptionalObjectOutputStream)
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toList());
-    }
-
     @Override
     public Object execute() {
         initiateOutputStreams(outputsAdresses);
         OperatorNode.state = State.READY;
         return OperatorNode.state;
+    }
+
+    private static void initiateOutputStreams(final List<Address> outputsAdresses) {
+        OperatorNode.outputStreams = outputsAdresses.stream()
+                .map(Address::getOptionalObjectOutputStream)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
     }
 }

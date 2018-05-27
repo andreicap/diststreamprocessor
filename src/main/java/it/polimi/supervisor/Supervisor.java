@@ -15,9 +15,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 
-import java.io.EOFException;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -47,7 +45,7 @@ public class Supervisor {
         this.template = template;
     }
 
-    @Scheduled(fixedRate = 200)
+    @Scheduled(fixedRate = 500)
     public void checkOperatorsState() {
         final List<OperatorDetails> operatorDetails = getOperatorsDetails();
         template.convertAndSend("/topic/operators", operatorDetails);
@@ -154,11 +152,8 @@ public class Supervisor {
             for (int i = 0; i < leafOperators; i++) {
                 final Socket leafOperatorSocket = targetServerSocket.accept();
                 new RxObjectInputStream(leafOperatorSocket)
-                        .onException((e) -> counter.incrementAndGet()
-                        )
-                        .subscribe(value -> {
-                            finalOutput.add(value);
-                        }, Double.class)
+                        .onException((e) -> counter.incrementAndGet())
+                        .subscribe(finalOutput::add, Double.class)
                         .start();
             }
 

@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.awaitility.Awaitility.await;
 
 @Log
 @RequiredArgsConstructor
@@ -23,16 +26,27 @@ public class StartProcessing implements Command {
 
     private final Integer inputsNumber;
 
+    private final AtomicInteger counter = new AtomicInteger(0);
+
     @Override
     public Object execute() {
         OperatorNode.state = State.BUSY;
 
-        while (emptyInputStreams() < inputsNumber) {
-            OperatorNode.inputStreams
-                    .forEach(inputStream -> AggregationFunc.getFunc(aggregation)
-                            .apply(inputStream.getWindow(windowSize, windowSlide))
-                            .ifPresent(this::forwardResult));
-        }
+        await().until(() -> OperatorNode.inputWindowStreams.size() == inputsNumber);
+
+        OperatorNode.inputWindowStreams
+                .forEach(inputWindowStream -> inputWindowStream
+                        .withWindowSize(windowSize)
+                        .withWindowSlide(windowSlide)
+                        .onEndOfStream(counter::incrementAndGet)
+                        .subscribe((window) ->
+                                AggregationFunc.getFunc(aggregation)
+                                        .apply(window.stream())
+                                        .ifPresent(this::forwardResult)
+                        )
+                        .start());
+
+        await().until(() -> counter.get() == inputsNumber);
 
         cleanUp();
         OperatorNode.state = State.FREE;
@@ -49,14 +63,8 @@ public class StartProcessing implements Command {
         });
     }
 
-    private long emptyInputStreams() {
-        return OperatorNode.inputStreams.stream()
-                .filter(inputStream -> inputStream.isEmpty(windowSize))
-                .count();
-    }
-
     private void cleanUp() {
-        OperatorNode.inputStreams.clear();
+        OperatorNode.inputWindowStreams.clear();
         OperatorNode.outputStreams.forEach(outputStream -> {
             try {
                 outputStream.flush();

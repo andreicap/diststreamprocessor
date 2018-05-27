@@ -2,15 +2,13 @@ package it.polimi;
 
 import com.google.common.collect.Lists;
 import it.polimi.command.Command;
-import it.polimi.command.HealthCheck;
 import it.polimi.supervisor.worker.Address;
 import it.polimi.supervisor.worker.State;
 import it.polimi.util.RxObjectInputStream;
-import it.polimi.util.WindowedInputStream;
+import it.polimi.util.RxWindowStream;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -21,15 +19,13 @@ public class OperatorNode {
 
     private static final int ANY_PORT = 0;
 
-    public static List<WindowedInputStream> inputStreams = Lists.newArrayList();
+    public static List<RxWindowStream<Double>> inputWindowStreams = Lists.newArrayList();
 
     public static List<ObjectOutputStream> outputStreams;
 
     public static State state = State.FREE;
 
     private static ServerSocket serverSocket;
-
-    private static ObjectInputStream supervisorInputStream;
 
     private static ObjectOutputStream supervisorOutputStream;
 
@@ -45,7 +41,7 @@ public class OperatorNode {
             while (true) {
                 final Socket clientSocket = serverSocket.accept();
                 log.info("Received connection from: " + clientSocket);
-                inputStreams.add(new WindowedInputStream(clientSocket));
+                inputWindowStreams.add(new RxWindowStream<>(clientSocket));
             }
         } catch (IOException e) {
             log.severe("Operator failed.");

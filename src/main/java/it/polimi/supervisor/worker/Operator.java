@@ -12,7 +12,6 @@ import lombok.Setter;
 import lombok.extern.java.Log;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.List;
@@ -88,7 +87,7 @@ public class Operator {
 
     private void scheduledHealthCheck() {
         final ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        this.future = service.scheduleAtFixedRate(() -> executeRemoteCommand(new HealthCheck()), 0, 2, TimeUnit.SECONDS);
+        this.future = service.scheduleAtFixedRate(() -> executeRemoteCommand(new HealthCheck()), 0, 1, TimeUnit.SECONDS);
     }
 
     public void deploy() {

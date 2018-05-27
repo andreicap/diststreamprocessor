@@ -17,7 +17,8 @@ public class RxObjectInputStream {
 
     private Consumer<? super IOException> ioExceptionConsumer = Throwable::printStackTrace;
 
-    private Consumer<? super EOFException> eofExceptionConsumer = (e) -> {};
+    private Consumer<? super EOFException> eofExceptionConsumer = (e) -> {
+    };
 
     private Consumer<? super ClassNotFoundException> classNotFoundExceptionConsumer = Throwable::printStackTrace;
 
