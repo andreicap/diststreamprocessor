@@ -32,7 +32,7 @@ public class StartProcessing implements Command {
     public Object execute() {
         OperatorNode.state = State.BUSY;
 
-        await().until(() -> OperatorNode.inputWindowStreams.size() == inputsNumber);
+        waitUnilAllInputsRegistered();
 
         OperatorNode.inputWindowStreams
                 .forEach(inputWindowStream -> inputWindowStream
@@ -46,11 +46,19 @@ public class StartProcessing implements Command {
                         )
                         .start());
 
-        await().until(() -> counter.get() == inputsNumber);
+        waitUntilAllInputsEnded();
 
         cleanUp();
         OperatorNode.state = State.FREE;
         return OperatorNode.state;
+    }
+
+    private void waitUnilAllInputsRegistered() {
+        await().until(() -> OperatorNode.inputWindowStreams.size() == inputsNumber);
+    }
+
+    private void waitUntilAllInputsEnded() {
+        await().until(() -> counter.get() == inputsNumber);
     }
 
     private void forwardResult(final Double result) {
