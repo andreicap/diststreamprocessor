@@ -45,11 +45,11 @@ function prettyPrint(value) {
 function getContext(state) {
     if (state === "FREE") {
         return "success";
-    } else if (state === "READY") {
+    } else if (state === "READY" || state === "INFO") {
         return "info";
-    } else if (state === "BUSY") {
+    } else if (state === "BUSY" || state === "WARN") {
         return "warning";
-    } else if (state === "CRUSHED") {
+    } else if (state === "CRUSHED" || state === "SEVERE" ) {
         return "danger";
     } else {
         return "default";
@@ -57,8 +57,8 @@ function getContext(state) {
 }
 
 function showLogs(log) {
-    $("#logs").append(
-        "<tr>" +
+    $("#logs").prepend(
+        "<tr class=\"" + getContext(log.level) + "\">" +
         "<td>" + log.time + "</td>" +
         "<td>" + log.level + "</td>" +
         "<td>" + log.message + "</td>" +
