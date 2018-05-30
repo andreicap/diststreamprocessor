@@ -1,0 +1,43 @@
+{
+  "operators": [
+    {
+      "id": 0,
+      "windowSize": 3,
+      "windowSlide": 1,
+      "aggregation": "MIN"
+    },
+    {
+      "id": 1,
+      "windowSize": 2,
+      "windowSlide": 1,
+      "aggregation": "SUM"
+    },
+    {
+      "id": 2,
+      "windowSize": 2,
+      "windowSlide": 1,
+      "aggregation": "SUM"
+    },
+    {
+      "id": 3,
+      "windowSize": 2,
+      "windowSlide": 1,
+      "aggregation": "SUM"
+    }
+  ],
+  "pipes": [{
+      "input": 0,
+      "output": 1
+    },
+    {
+      "input": 1,
+      "output": 2
+    },
+    {
+      "input": 2,
+      "output": 3
+    }
+  ],
+  "inputValues": [1, 2, 5, 6, 4, 0, 7, 1, 5, 8, 4, 6, 2, 6, -4, 3, -2, 0, 9,1, 2, 5, 6, 4, 0, 7, 1, 5, 8, 4, 6, 2, 6, -4, 3, -2, 0, 9],
+  "delay": 100
+}
