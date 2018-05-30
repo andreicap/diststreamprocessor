@@ -54,8 +54,8 @@ public class OperatorNode {
             log.info("Registering operator.");
             final Socket socket = new Socket("localhost", 2000);
             supervisorOutputStream = new ObjectOutputStream(socket.getOutputStream());
-            final Address address = new Address(serverSocket.getInetAddress().getHostName(), serverSocket.getLocalPort());
-            supervisorOutputStream.writeObject(address);
+            final Integer port = serverSocket.getLocalPort();
+            supervisorOutputStream.writeObject(port);
 
             serveSupervisorCommands(socket);
         } catch (IOException e) {

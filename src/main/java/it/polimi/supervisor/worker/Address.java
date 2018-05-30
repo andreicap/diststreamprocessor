@@ -24,11 +24,4 @@ public class Address implements Serializable {
             return Optional.empty();
         }
     }
-
-    public String getHost() {
-        if (host.contains("0.0.0.0")) {
-            return "localhost";
-        }
-        return host;
-    }
 }
