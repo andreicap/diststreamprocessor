@@ -76,7 +76,7 @@ public class Operator {
 
     private void handleResponses() {
         new RxObjectInputStream(socket)
-                .subscribe((port) -> address = new Address(socket.getInetAddress().getHostName(), port), Integer.class)
+                .subscribe((input) -> address = input, Address.class)
                 .subscribe((input) -> state = input, State.class)
                 .onException((e) -> {
                     state = State.CRUSHED;

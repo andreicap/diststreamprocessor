@@ -17,6 +17,7 @@ import org.springframework.stereotype.Controller;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
@@ -138,7 +139,8 @@ public class Supervisor {
 
     private void initiateTarget(final List<Operator> selectedOperators, final List<Integer> leafOperatorIds) throws IOException {
         final ServerSocket targetServerSocket = new ServerSocket(ANY_PORT);
-        final Address targetAddress = new Address(targetServerSocket.getInetAddress().getHostName(), targetServerSocket.getLocalPort());
+        final String host = InetAddress.getLocalHost().getHostAddress();
+        final Address targetAddress = new Address(host, targetServerSocket.getLocalPort());
         selectedOperators.stream()
                 .filter(operator -> leafOperatorIds.contains(operator.getOperatorId()))
                 .forEach(operator -> operator.getOutputsAdresses().add(targetAddress));
