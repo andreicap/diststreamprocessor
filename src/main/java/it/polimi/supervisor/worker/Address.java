@@ -18,7 +18,7 @@ public class Address implements Serializable {
 
     public Optional<ObjectOutputStream> getOptionalObjectOutputStream() {
         try {
-            final Socket socket = new Socket(getHost(), port);
+            final Socket socket = new Socket(getHostOrLocalhostIfOnSameMachine(), port);
             final ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
             return Optional.of(outputStream);
         } catch (IOException e) {
@@ -27,7 +27,7 @@ public class Address implements Serializable {
         }
     }
 
-    public String getHost() {
+    public String getHostOrLocalhostIfOnSameMachine() {
         try {
             if (host.equals(InetAddress.getLocalHost().getHostAddress())) {
                 return "localhost";

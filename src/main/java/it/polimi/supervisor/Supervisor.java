@@ -190,7 +190,7 @@ public class Supervisor {
 
     private void streamInput(final Address address, final List<Double> inputValues, final Integer delay) {
         try {
-            final Socket socket = new Socket(address.getHost(), address.getPort());
+            final Socket socket = new Socket(address.getHostOrLocalhostIfOnSameMachine(), address.getPort());
             final ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
             inputValues.forEach(i -> {
