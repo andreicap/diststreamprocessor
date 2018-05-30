@@ -5,7 +5,9 @@ import lombok.Value;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Optional;
 
 @Value
@@ -22,6 +24,17 @@ public class Address implements Serializable {
         } catch (IOException e) {
             e.printStackTrace();
             return Optional.empty();
+        }
+    }
+
+    public String getHost() {
+        try {
+            if (host.equals(InetAddress.getLocalHost().getHostAddress())) {
+                return "localhost";
+            }
+            return host;
+        } catch (UnknownHostException e) {
+            return null;
         }
     }
 }

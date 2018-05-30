@@ -21,8 +21,8 @@ public class Deploy implements Command {
         return OperatorNode.state;
     }
 
-    private static void initiateOutputStreams(final List<Address> outputsAdresses) {
-        OperatorNode.outputStreams = outputsAdresses.stream()
+    private static void initiateOutputStreams(final List<Address> outputsAddresses) {
+        OperatorNode.outputStreams = outputsAddresses.stream()
                 .map(Address::getOptionalObjectOutputStream)
                 .filter(Optional::isPresent)
                 .map(Optional::get)

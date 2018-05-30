@@ -2,7 +2,6 @@ package it.polimi;
 
 import com.google.common.collect.Lists;
 import it.polimi.command.Command;
-import it.polimi.supervisor.worker.Address;
 import it.polimi.supervisor.worker.State;
 import it.polimi.util.RxObjectInputStream;
 import it.polimi.util.RxWindowStream;
@@ -52,7 +51,7 @@ public class OperatorNode {
     private static void register() {
         try {
             log.info("Registering operator.");
-            final Socket socket = new Socket("localhost", 2000);
+            final Socket socket = new Socket("164.254.246.150", 2000);
             supervisorOutputStream = new ObjectOutputStream(socket.getOutputStream());
             final Integer port = serverSocket.getLocalPort();
             supervisorOutputStream.writeObject(port);
