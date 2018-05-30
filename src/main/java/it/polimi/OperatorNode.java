@@ -32,7 +32,8 @@ public class OperatorNode {
 
     public static void main(String[] args) {
         new Thread(OperatorNode::acceptInputStreams).start();
-        register();
+        final String supervisorHost = args[0];
+        register(supervisorHost);
     }
 
     private static void acceptInputStreams() {
@@ -50,10 +51,10 @@ public class OperatorNode {
         }
     }
 
-    private static void register() {
+    private static void register(final String supervisorHost) {
         try {
             log.info("Registering operator.");
-            final Socket socket = new Socket("172.20.10.14", 2000);
+            final Socket socket = new Socket(supervisorHost, 2000);
             supervisorOutputStream = new ObjectOutputStream(socket.getOutputStream());
             final String host = InetAddress.getLocalHost().getHostAddress();
             final Address address = new Address(host, serverSocket.getLocalPort());
